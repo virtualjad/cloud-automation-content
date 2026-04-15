@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Family Chore Chart</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>Family Chore Chart</h1>
+    <p class="tagline">Track chores, earn points, get stuff done.</p>
+    <nav class="tabs" role="tablist">
+      <button class="tab active" data-tab="today" role="tab">Today</button>
+      <button class="tab" data-tab="week" role="tab">This Week</button>
+      <button class="tab" data-tab="manage" role="tab">Manage</button>
+      <button class="tab" data-tab="stats" role="tab">Leaderboard</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- TODAY -->
+    <section id="tab-today" class="tab-panel active">
+      <div class="panel-head">
+        <h2 id="today-heading">Today</h2>
+        <div class="who-filter">
+          <label for="today-who">Show:</label>
+          <select id="today-who">
+            <option value="all">Everyone</option>
+          </select>
+        </div>
+      </div>
+      <div id="today-list" class="chore-list"></div>
+    </section>
+
+    <!-- WEEK -->
+    <section id="tab-week" class="tab-panel">
+      <div class="panel-head">
+        <h2>This Week</h2>
+        <div class="week-nav">
+          <button id="week-prev" class="btn-ghost">&larr; Prev</button>
+          <span id="week-label"></span>
+          <button id="week-next" class="btn-ghost">Next &rarr;</button>
+        </div>
+      </div>
+      <div id="week-grid" class="week-grid"></div>
+    </section>
+
+    <!-- MANAGE -->
+    <section id="tab-manage" class="tab-panel">
+      <div class="manage-grid">
+        <div class="card">
+          <h2>Family Members</h2>
+          <form id="member-form" class="stack">
+            <label>
+              Name
+              <input type="text" id="member-name" placeholder="e.g. Alex" required />
+            </label>
+            <label>
+              Color
+              <input type="color" id="member-color" value="#6c9df8" />
+            </label>
+            <button type="submit" class="btn-primary">Add Member</button>
+          </form>
+          <ul id="member-list" class="member-list"></ul>
+        </div>
+
+        <div class="card">
+          <h2>Chores</h2>
+          <form id="chore-form" class="stack">
+            <label>
+              Chore
+              <input type="text" id="chore-name" placeholder="e.g. Take out the trash" required />
+            </label>
+            <label>
+              Assigned to
+              <select id="chore-assignee" required></select>
+            </label>
+            <label>
+              Points
+              <input type="number" id="chore-points" value="5" min="1" max="100" required />
+            </label>
+            <fieldset class="days-fieldset">
+              <legend>Days</legend>
+              <div class="days-row">
+                <label><input type="checkbox" class="day-cb" value="0" /> Sun</label>
+                <label><input type="checkbox" class="day-cb" value="1" checked /> Mon</label>
+                <label><input type="checkbox" class="day-cb" value="2" checked /> Tue</label>
+                <label><input type="checkbox" class="day-cb" value="3" checked /> Wed</label>
+                <label><input type="checkbox" class="day-cb" value="4" checked /> Thu</label>
+                <label><input type="checkbox" class="day-cb" value="5" checked /> Fri</label>
+                <label><input type="checkbox" class="day-cb" value="6" /> Sat</label>
+              </div>
+              <div class="day-presets">
+                <button type="button" class="btn-ghost" data-preset="weekdays">Weekdays</button>
+                <button type="button" class="btn-ghost" data-preset="weekends">Weekends</button>
+                <button type="button" class="btn-ghost" data-preset="daily">Daily</button>
+                <button type="button" class="btn-ghost" data-preset="clear">Clear</button>
+              </div>
+            </fieldset>
+            <label>
+              Notes (optional)
+              <textarea id="chore-notes" rows="2" placeholder="How-to or reminders"></textarea>
+            </label>
+            <button type="submit" class="btn-primary">Add Chore</button>
+          </form>
+          <ul id="chore-list-manage" class="chore-manage-list"></ul>
+        </div>
+
+        <div class="card danger-zone">
+          <h2>Danger Zone</h2>
+          <p>Reset stats without losing members or chore definitions.</p>
+          <button id="reset-week" class="btn-danger">Reset This Week's Completions</button>
+          <button id="reset-all" class="btn-danger">Reset All Data</button>
+          <hr />
+          <button id="export-data" class="btn-ghost">Export Data</button>
+          <button id="import-data" class="btn-ghost">Import Data</button>
+          <input type="file" id="import-file" accept="application/json" hidden />
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <section id="tab-stats" class="tab-panel">
+      <div class="panel-head">
+        <h2>Leaderboard</h2>
+        <div class="range-toggle">
+          <button class="btn-ghost range-btn active" data-range="week">This Week</button>
+          <button class="btn-ghost range-btn" data-range="all">All Time</button>
+        </div>
+      </div>
+      <div id="leaderboard"></div>
+      <div id="streaks" class="streaks"></div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <small>Data is saved locally in your browser. Use Export on the Manage tab to back it up.</small>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
