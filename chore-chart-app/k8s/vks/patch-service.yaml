@@ -1,0 +1,9 @@
+# Use LoadBalancer so NSX ALB / AVI (the default in VKS) allocates a VIP.
+# Swap back to ClusterIP if you prefer to expose via Ingress only.
+apiVersion: v1
+kind: Service
+metadata:
+  name: chore-chart
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: Cluster

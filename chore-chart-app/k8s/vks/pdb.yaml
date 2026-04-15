@@ -1,0 +1,12 @@
+# Keeps at least 2 of 3 replicas serving during voluntary disruptions
+# (node drains, cluster upgrades, vSphere host maintenance).
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: chore-chart
+  namespace: chore-chart
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: chore-chart

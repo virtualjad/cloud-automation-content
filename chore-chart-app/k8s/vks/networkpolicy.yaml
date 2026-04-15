@@ -1,0 +1,28 @@
+# Default-deny ingress to the namespace, then explicitly allow HTTP
+# traffic to the chore-chart pods. Requires a CNI that enforces
+# NetworkPolicy (Antrea, the default in VKS, does).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: chore-chart
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-http-to-chore-chart
+  namespace: chore-chart
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: chore-chart
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 8080

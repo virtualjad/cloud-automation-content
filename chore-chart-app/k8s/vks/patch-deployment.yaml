@@ -1,0 +1,43 @@
+# 3 replicas, one on each worker node, with graceful eviction behavior.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chore-chart
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    spec:
+      # Spread pods across worker nodes so a single host reboot (patching,
+      # vMotion, etc.) never takes the whole app down.
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: chore-chart
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: chore-chart
+                topologyKey: kubernetes.io/hostname
+      containers:
+        - name: web
+          # imagePullPolicy bumped because we're pulling from a real registry
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 25m
+              memory: 32Mi
+            limits:
+              cpu: 250m
+              memory: 96Mi

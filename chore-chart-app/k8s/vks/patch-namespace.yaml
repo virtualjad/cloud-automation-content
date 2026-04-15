@@ -1,0 +1,12 @@
+# Opt the namespace into the strictest Pod Security Admission profile.
+# VKS supports PSA out of the box; "restricted" blocks privileged pods,
+# host namespaces, hostPath volumes, etc.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: chore-chart
+  labels:
+    pod-security.kubernetes.io/enforce: restricted
+    pod-security.kubernetes.io/enforce-version: latest
+    pod-security.kubernetes.io/audit: restricted
+    pod-security.kubernetes.io/warn: restricted

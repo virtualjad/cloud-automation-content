@@ -1,0 +1,58 @@
+# VKS overlay — VMware vSphere Kubernetes Service
+#
+# Adjustments for a real, multi-node cluster:
+#  * Image comes from a real registry (Harbor / Docker Hub / etc.)
+#  * 3 replicas spread evenly across the 3 worker nodes
+#  * Service type LoadBalancer (NSX ALB / AVI provisions a VIP)
+#  * PodDisruptionBudget for rolling node operations
+#  * NetworkPolicy restricting ingress to the Service port
+#  * Namespace is labeled for Pod Security Admission "restricted"
+#
+# Usage:
+#   # 1. build and push the image to a registry your VKS cluster can reach
+#   docker build -t harbor.example.com/chore-chart/chore-chart:1.0.0 ../..
+#   docker push harbor.example.com/chore-chart/chore-chart:1.0.0
+#
+#   # 2. update images[].newName / newTag below to match
+#
+#   # 3. apply
+#   kubectl apply -k k8s/vks/
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: chore-chart
+
+resources:
+  - ../namespace.yaml
+  - ../deployment.yaml
+  - ../service.yaml
+  - pdb.yaml
+  - networkpolicy.yaml
+  # Uncomment once you have a LoadBalancer-class or ingress controller:
+  # - ../ingress.yaml
+
+patches:
+  - path: patch-namespace.yaml
+    target:
+      kind: Namespace
+      name: chore-chart
+  - path: patch-deployment.yaml
+    target:
+      kind: Deployment
+      name: chore-chart
+  - path: patch-service.yaml
+    target:
+      kind: Service
+      name: chore-chart
+
+commonLabels:
+  app.kubernetes.io/name: chore-chart
+  app.kubernetes.io/part-of: chore-chart
+  app.kubernetes.io/managed-by: kustomize
+
+images:
+  - name: chore-chart
+    # CHANGE ME: point at your registry. Example shown for Harbor.
+    newName: harbor.example.com/chore-chart/chore-chart
+    newTag: "1.0.0"
