@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0e1116" />
+  <title>Smart Home Dashboard</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo" aria-hidden="true"></span>
+        <h1 id="dashboard-title">Home</h1>
+      </div>
+      <nav id="room-tabs" class="room-tabs" role="tablist"></nav>
+      <div class="actions">
+        <button id="btn-edit" class="icon-btn" title="Edit dashboard" aria-label="Edit dashboard">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm17.71-10.04a1 1 0 0 0 0-1.41l-2.5-2.5a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.99-1.67z"/></svg>
+        </button>
+        <button id="btn-add" class="icon-btn" title="Add accessory" aria-label="Add accessory">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></svg>
+        </button>
+        <button id="btn-settings" class="icon-btn" title="Settings" aria-label="Settings">
+          <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M19.43 12.98a7.65 7.65 0 0 0 0-1.96l2.11-1.65a.5.5 0 0 0 .12-.64l-2-3.46a.5.5 0 0 0-.6-.22l-2.49 1a7.7 7.7 0 0 0-1.7-.98l-.38-2.65A.5.5 0 0 0 14 2h-4a.5.5 0 0 0-.5.42l-.38 2.65c-.6.25-1.17.58-1.7.98l-2.49-1a.5.5 0 0 0-.6.22l-2 3.46a.5.5 0 0 0 .12.64l2.11 1.65a7.65 7.65 0 0 0 0 1.96L2.45 14.6a.5.5 0 0 0-.12.64l2 3.46c.14.24.42.34.67.22l2.49-1c.53.4 1.1.73 1.7.98l.38 2.65c.05.24.26.45.5.45h4a.5.5 0 0 0 .5-.42l.38-2.65c.6-.25 1.17-.58 1.7-.98l2.49 1c.25.1.53 0 .67-.22l2-3.46a.5.5 0 0 0-.12-.64l-2.11-1.65zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main id="dashboard" class="dashboard"></main>
+
+    <footer class="statusbar">
+      <span id="status-text">Loading…</span>
+      <span id="connection-pill" class="pill" data-status="disconnected">Disconnected</span>
+    </footer>
+  </div>
+
+  <!-- Modal: Add / Edit accessory -->
+  <dialog id="modal-accessory" class="modal">
+    <form id="accessory-form" method="dialog">
+      <h2 id="accessory-form-title">Add Accessory</h2>
+
+      <label>
+        Name
+        <input name="name" type="text" required maxlength="48" placeholder="Living Room Lamp" />
+      </label>
+
+      <div class="row">
+        <label>
+          Protocol
+          <select name="protocol" required>
+            <option value="homekit">HomeKit</option>
+            <option value="matter">Matter</option>
+            <option value="zigbee">Zigbee</option>
+          </select>
+        </label>
+        <label>
+          Type
+          <select name="type" required>
+            <option value="light">Light</option>
+            <option value="switch">Switch / Outlet</option>
+            <option value="dimmer">Dimmer</option>
+            <option value="color-light">Color Light</option>
+            <option value="thermostat">Thermostat</option>
+            <option value="lock">Lock</option>
+            <option value="blind">Blinds / Cover</option>
+            <option value="fan">Fan</option>
+            <option value="sensor-temp">Temperature Sensor</option>
+            <option value="sensor-motion">Motion Sensor</option>
+            <option value="sensor-contact">Contact Sensor</option>
+            <option value="scene">Scene</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="row">
+        <label>
+          Room
+          <input name="room" type="text" list="room-suggestions" placeholder="Living Room" />
+          <datalist id="room-suggestions"></datalist>
+        </label>
+        <label>
+          Icon
+          <select name="icon">
+            <option value="auto">Auto</option>
+            <option value="bulb">Bulb</option>
+            <option value="lamp">Lamp</option>
+            <option value="outlet">Outlet</option>
+            <option value="thermo">Thermostat</option>
+            <option value="lock">Lock</option>
+            <option value="blind">Blind</option>
+            <option value="fan">Fan</option>
+            <option value="sensor">Sensor</option>
+            <option value="scene">Scene</option>
+          </select>
+        </label>
+      </div>
+
+      <label>
+        Device ID / Topic
+        <input name="deviceId" type="text" placeholder="zigbee2mqtt/0x00158d…  or  HK accessory UUID" />
+      </label>
+
+      <details>
+        <summary>Advanced</summary>
+        <label>
+          Bridge / Connector
+          <select name="bridge"></select>
+        </label>
+        <label>
+          Tile Size
+          <select name="size">
+            <option value="1x1">Small (1 x 1)</option>
+            <option value="2x1">Wide (2 x 1)</option>
+            <option value="2x2">Large (2 x 2)</option>
+          </select>
+        </label>
+      </details>
+
+      <menu class="form-actions">
+        <button type="button" id="accessory-delete" class="danger" hidden>Delete</button>
+        <button type="button" id="accessory-cancel">Cancel</button>
+        <button type="submit" class="primary">Save</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <!-- Modal: Settings (connectors) -->
+  <dialog id="modal-settings" class="modal">
+    <form id="settings-form" method="dialog">
+      <h2>Settings</h2>
+
+      <section>
+        <h3>Dashboard</h3>
+        <label>
+          Dashboard Name
+          <input name="title" type="text" maxlength="48" />
+        </label>
+        <label class="checkbox">
+          <input name="darkMode" type="checkbox" />
+          Dark mode
+        </label>
+        <label class="checkbox">
+          <input name="demoMode" type="checkbox" />
+          Demo mode (no real device traffic)
+        </label>
+      </section>
+
+      <section>
+        <h3>Connectors</h3>
+        <p class="muted">Configure bridges for each protocol. Leave blank to use Demo mode.</p>
+
+        <fieldset>
+          <legend>HomeKit (Home Assistant / Homebridge)</legend>
+          <label>Base URL <input name="hk_url" type="url" placeholder="http://homebridge.local:8581" /></label>
+          <label>Token <input name="hk_token" type="password" autocomplete="off" /></label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Matter (Matter Controller / HA)</legend>
+          <label>Base URL <input name="matter_url" type="url" placeholder="http://matter-controller.local:8080" /></label>
+          <label>Token <input name="matter_token" type="password" autocomplete="off" /></label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Zigbee (zigbee2mqtt over WebSocket)</legend>
+          <label>WebSocket URL <input name="zigbee_url" type="url" placeholder="ws://zigbee2mqtt.local:8080/api" /></label>
+          <label>Token <input name="zigbee_token" type="password" autocomplete="off" /></label>
+        </fieldset>
+      </section>
+
+      <section>
+        <h3>Backup &amp; Restore</h3>
+        <div class="row">
+          <button type="button" id="btn-export">Export Config</button>
+          <button type="button" id="btn-import">Import Config</button>
+          <button type="button" id="btn-reset" class="danger">Reset</button>
+        </div>
+        <input id="import-file" type="file" accept="application/json" hidden />
+      </section>
+
+      <menu class="form-actions">
+        <button type="button" id="settings-cancel">Cancel</button>
+        <button type="submit" class="primary">Save</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <!-- Modal: Accessory detail (full controls) -->
+  <dialog id="modal-detail" class="modal">
+    <div id="detail-content"></div>
+    <menu class="form-actions">
+      <button type="button" id="detail-edit">Edit</button>
+      <button type="button" id="detail-close" class="primary">Done</button>
+    </menu>
+  </dialog>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
