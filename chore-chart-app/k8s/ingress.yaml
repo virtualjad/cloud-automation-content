@@ -1,0 +1,22 @@
+# Optional: only apply this if you have an ingress controller installed
+# (e.g. `ingress-nginx` on kind/minikube).  Access at http://chore-chart.localtest.me
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: chore-chart
+  namespace: chore-chart
+  labels:
+    app.kubernetes.io/name: chore-chart
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: chore-chart.localtest.me
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: chore-chart
+                port:
+                  number: 80

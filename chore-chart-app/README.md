@@ -28,6 +28,88 @@ python3 -m http.server 8000
 # then visit http://localhost:8000
 ```
 
+## Running in a local Kubernetes cluster
+
+The app ships with a `Dockerfile` (nginx serving the static files on port 8080)
+and Kubernetes manifests under `k8s/` (Namespace, Deployment, Service, optional
+Ingress, plus a Kustomization).
+
+### 1. Build the image
+
+```bash
+cd chore-chart-app
+docker build -t chore-chart:latest .
+```
+
+### 2. Make the image available to your cluster
+
+Pick the section that matches your local tooling.
+
+**kind**
+```bash
+kind load docker-image chore-chart:latest
+# or, for a named cluster:
+kind load docker-image chore-chart:latest --name my-cluster
+```
+
+**minikube**
+```bash
+minikube image load chore-chart:latest
+# Alternative: build straight into minikube's daemon
+# eval $(minikube docker-env) && docker build -t chore-chart:latest .
+```
+
+**Docker Desktop / Rancher Desktop / k3d**
+- Docker Desktop Kubernetes uses your local Docker daemon directly — no load step needed.
+- For k3d: `k3d image import chore-chart:latest -c <cluster-name>`
+
+### 3. Deploy
+
+```bash
+kubectl apply -k k8s/
+```
+
+This creates the `chore-chart` namespace, a 2-replica Deployment, and a
+ClusterIP Service. Check it came up:
+
+```bash
+kubectl -n chore-chart get pods,svc
+kubectl -n chore-chart rollout status deploy/chore-chart
+```
+
+### 4. Open the app
+
+Quickest option — port-forward:
+
+```bash
+kubectl -n chore-chart port-forward svc/chore-chart 8080:80
+# then visit http://localhost:8080
+```
+
+Or via Ingress (requires an ingress controller, e.g. `ingress-nginx`):
+
+```bash
+# kind: https://kind.sigs.k8s.io/docs/user/ingress/
+# minikube: minikube addons enable ingress
+
+# Uncomment the ingress line in k8s/kustomization.yaml, then:
+kubectl apply -k k8s/
+
+# Visit http://chore-chart.localtest.me (resolves to 127.0.0.1)
+```
+
+### Tearing it down
+
+```bash
+kubectl delete -k k8s/
+```
+
+### Notes
+
+- The container runs as a non-root user with a read-only root filesystem, drops all capabilities, and requests only 10m CPU / 16Mi memory — safe to run on hardened local clusters.
+- All chore/member data lives in each browser's `localStorage`, so there's nothing to persist at the cluster level; replicas are interchangeable.
+- To change the image tag, edit `k8s/kustomization.yaml` under `images:` and re-apply.
+
 ## Files
 
 | File | Purpose |
@@ -35,6 +117,9 @@ python3 -m http.server 8000
 | `index.html` | Markup and tab layout |
 | `style.css` | Theme (auto light/dark), layout, week grid, leaderboard styling |
 | `app.js` | State management (localStorage), rendering, event handling |
+| `Dockerfile` | Packages the static site with nginx on port 8080 |
+| `nginx.conf` | nginx server config with gzip, caching, and a `/healthz` endpoint |
+| `k8s/` | Namespace, Deployment, Service, optional Ingress, Kustomization |
 
 ## Data model
 

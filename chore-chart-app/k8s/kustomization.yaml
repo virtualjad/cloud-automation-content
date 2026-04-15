@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: chore-chart
+
+resources:
+  - namespace.yaml
+  - deployment.yaml
+  - service.yaml
+  # Uncomment the next line once you have an ingress controller installed.
+  # - ingress.yaml
+
+commonLabels:
+  app.kubernetes.io/name: chore-chart
+  app.kubernetes.io/part-of: chore-chart
+
+images:
+  - name: chore-chart
+    newTag: latest
